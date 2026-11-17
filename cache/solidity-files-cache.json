@@ -2,13 +2,14 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "C:\\Users\\ATR-PC's\\Desktop\\NFT Web\\contracts\\FuzailNFT.sol": {
-      "lastModificationDate": 1794924511056,
-      "contentHash": "6d928d9071f5dd199a3e765c5d1bc3d0",
+      "lastModificationDate": 1794934275667,
+      "contentHash": "4908f91edb1dba4f10d3f72ee8b207fa",
       "sourceName": "contracts/FuzailNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -48,6 +49,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -86,6 +88,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -127,6 +130,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -163,6 +167,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -202,6 +207,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -238,6 +244,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -282,6 +289,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -320,6 +328,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -356,6 +365,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -392,6 +402,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -430,6 +441,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -468,6 +480,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -509,6 +522,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -547,6 +561,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -586,6 +601,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -624,6 +640,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -663,6 +680,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -699,6 +717,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -737,6 +756,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -773,6 +793,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -802,13 +823,14 @@
       ]
     },
     "C:\\Users\\ATR-PC's\\Desktop\\NFT Web\\contracts\\TokenToNFT.sol": {
-      "lastModificationDate": 1794924533374,
-      "contentHash": "26fc93b666ced27b4e05e087e4236615",
+      "lastModificationDate": 1794934289335,
+      "contentHash": "dd42a53688360ba0288e91f2a723af37",
       "sourceName": "contracts/TokenToNFT.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -844,13 +866,14 @@
       ]
     },
     "C:\\Users\\ATR-PC's\\Desktop\\NFT Web\\contracts\\FuzailToken.sol": {
-      "lastModificationDate": 1794924510897,
-      "contentHash": "1be69ddc06ad17e0f54a03f8b9d3223d",
+      "lastModificationDate": 1794934275599,
+      "contentHash": "685f7ea50591601dfada1fd35a2cb25e",
       "sourceName": "contracts/FuzailToken.sol",
       "solcConfig": {
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -890,6 +913,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -928,6 +952,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -967,6 +992,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -1008,6 +1034,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -1044,6 +1071,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -1082,6 +1110,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -1118,6 +1147,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -1157,6 +1187,7 @@
         "version": "0.8.24",
         "settings": {
           "evmVersion": "cancun",
+          "viaIR": true,
           "optimizer": {
             "enabled": true,
             "runs": 200
@@ -1184,6 +1215,48 @@
         ">=0.4.16"
       ],
       "artifacts": []
+    },
+    "C:\\Users\\ATR-PC's\\Desktop\\NFT Web\\contracts\\ProjectFactory.sol": {
+      "lastModificationDate": 1794934370604,
+      "contentHash": "e6c8768f41e2820161a089fc9937a705",
+      "sourceName": "contracts/ProjectFactory.sol",
+      "solcConfig": {
+        "version": "0.8.24",
+        "settings": {
+          "evmVersion": "cancun",
+          "viaIR": true,
+          "optimizer": {
+            "enabled": true,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "./FuzailToken.sol",
+        "./FuzailNFT.sol",
+        "./TokenToNFT.sol",
+        "@openzeppelin/contracts/access/Ownable.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.24"
+      ],
+      "artifacts": [
+        "ProjectFactory"
+      ]
     }
   }
 }

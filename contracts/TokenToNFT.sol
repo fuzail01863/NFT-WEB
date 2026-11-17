@@ -9,30 +9,16 @@ import "./FuzailNFT.sol";
 
 /**
  * @title TokenToNFT
- * @dev Exchange contract: Users deposit exactly 5 FZT tokens and receive 1 FZNFT.
- *
- * Security:
- * - Uses SafeERC20 for safe ERC-20 transfers.
- * - Uses ReentrancyGuard to prevent re-entrancy attacks.
- * - Checks-Effects-Interactions pattern applied.
- * - Exactly 5 tokens (with 18 decimals) required per mint.
- * - One deposit always produces exactly one NFT — no more, no less.
+ * @dev Exchange contract: Users deposit specified ERC-20 tokens to mint 1 NFT.
+ * Dynamic token requirements, decimals, and custom NFT metadata.
  */
 contract TokenToNFT is ReentrancyGuard, Ownable {
     using SafeERC20 for IERC20;
 
-    // ─────────────────────────── State variables ───────────────────────────
-
     IERC20 public immutable fuzailToken;
     FuzailNFT public immutable fuzailNFT;
-
-    /// @dev Exactly 5 FZT tokens required (18 decimals).
-    uint256 public constant REQUIRED_TOKENS = 5 * 10 ** 18;
-
-    /// @dev Base metadata URI used for minted NFTs.
+    uint256 public requiredTokens;
     string public baseMetadataURI;
-
-    // ──────────────────────────────── Events ───────────────────────────────
 
     event TokensDeposited(
         address indexed user,
@@ -41,105 +27,74 @@ contract TokenToNFT is ReentrancyGuard, Ownable {
         uint256 timestamp
     );
     event BaseURIUpdated(string newURI);
+    event RequiredTokensUpdated(uint256 newAmount);
     event TokensWithdrawn(address indexed to, uint256 amount);
 
-    // ──────────────────────────── Constructor ──────────────────────────────
-
-    /**
-     * @param _fuzailToken Address of the deployed FuzailToken contract.
-     * @param _fuzailNFT   Address of the deployed FuzailNFT contract.
-     * @param _baseMetadataURI Base URI for NFT metadata (e.g. "https://api.example.com/metadata/").
-     */
     constructor(
         address _fuzailToken,
         address _fuzailNFT,
-        string memory _baseMetadataURI
-    ) Ownable(msg.sender) {
+        uint256 _requiredTokens,
+        string memory _baseMetadataURI,
+        address _owner
+    ) Ownable(_owner) {
         require(_fuzailToken != address(0), "TokenToNFT: zero token address");
         require(_fuzailNFT != address(0), "TokenToNFT: zero NFT address");
+        require(_requiredTokens > 0, "TokenToNFT: required tokens must be > 0");
 
         fuzailToken = IERC20(_fuzailToken);
         fuzailNFT = FuzailNFT(_fuzailNFT);
+        requiredTokens = _requiredTokens;
         baseMetadataURI = _baseMetadataURI;
     }
 
-    // ───────────────────────────── Core logic ──────────────────────────────
-
     /**
-     * @notice Deposit exactly 5 FZT tokens and receive 1 FZNFT.
-     *
-     * Flow:
-     * 1. User approves this contract to spend 5 FZT (done from the frontend).
-     * 2. User calls depositTokensForNFT().
-     * 3. Contract pulls 5 FZT from user (transferFrom).
-     * 4. Contract mints exactly 1 NFT directly to the user's wallet.
-     *
-     * @dev ReentrancyGuard prevents recursive calls.
-     *      Checks → Effects → Interactions pattern applied.
+     * @notice Deposit required tokens and mint 1 NFT directly to user's wallet.
      */
     function depositTokensForNFT() external nonReentrant {
         address user = msg.sender;
 
         // ── Checks ──────────────────────────────────────────────────────────
         uint256 userBalance = fuzailToken.balanceOf(user);
-        require(userBalance >= REQUIRED_TOKENS, "TokenToNFT: insufficient FZT balance");
+        require(userBalance >= requiredTokens, "TokenToNFT: insufficient token balance");
 
         uint256 allowance = fuzailToken.allowance(user, address(this));
-        require(allowance >= REQUIRED_TOKENS, "TokenToNFT: insufficient allowance");
-
-        // ── Effects: nothing on-chain to mutate before the external calls ──
-        // (The NFT contract tracks token IDs internally.)
+        require(allowance >= requiredTokens, "TokenToNFT: insufficient allowance");
 
         // ── Interactions ────────────────────────────────────────────────────
-        // Pull exactly 5 FZT from user. SafeERC20 reverts on failure.
-        fuzailToken.safeTransferFrom(user, address(this), REQUIRED_TOKENS);
+        fuzailToken.safeTransferFrom(user, address(this), requiredTokens);
 
-        // Build a deterministic token URI from the next token ID.
         uint256 nextId = fuzailNFT.nextTokenId();
         string memory tokenURI = string(
             abi.encodePacked(baseMetadataURI, _uint2str(nextId), ".json")
         );
 
-        // Mint exactly 1 NFT to the user. The NFT contract increments its own counter.
         uint256 mintedId = fuzailNFT.mintNFT(user, tokenURI);
-
-        // Sanity check: ensure we minted exactly the expected token.
         require(mintedId == nextId, "TokenToNFT: unexpected token ID");
 
-        emit TokensDeposited(user, REQUIRED_TOKENS, mintedId, block.timestamp);
+        emit TokensDeposited(user, requiredTokens, mintedId, block.timestamp);
     }
 
-    // ───────────────────────────── Admin ───────────────────────────────────
+    function setRequiredTokens(uint256 newAmount) external onlyOwner {
+        require(newAmount > 0, "TokenToNFT: must be > 0");
+        requiredTokens = newAmount;
+        emit RequiredTokensUpdated(newAmount);
+    }
 
-    /**
-     * @dev Update the base metadata URI (owner only).
-     */
     function setBaseMetadataURI(string memory _uri) external onlyOwner {
         baseMetadataURI = _uri;
         emit BaseURIUpdated(_uri);
     }
 
-    /**
-     * @dev Withdraw accumulated FZT tokens to a specified address (owner only).
-     */
     function withdrawTokens(address to, uint256 amount) external onlyOwner {
         require(to != address(0), "TokenToNFT: zero address");
         fuzailToken.safeTransfer(to, amount);
         emit TokensWithdrawn(to, amount);
     }
 
-    /**
-     * @dev Returns the FZT token balance held by this contract.
-     */
     function contractTokenBalance() external view returns (uint256) {
         return fuzailToken.balanceOf(address(this));
     }
 
-    // ───────────────────────── Internal helpers ────────────────────────────
-
-    /**
-     * @dev Converts a uint256 to its ASCII string representation.
-     */
     function _uint2str(uint256 value) internal pure returns (string memory) {
         if (value == 0) return "0";
         uint256 temp = value;

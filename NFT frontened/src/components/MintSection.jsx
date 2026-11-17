@@ -5,12 +5,12 @@ import {
   ArrowRight, 
   ExternalLink, 
   RefreshCw, 
-  AlertCircle, 
   Coins, 
   Sparkles, 
   ShieldCheck,
   Gift,
-  HelpCircle
+  Flame,
+  ArrowDown
 } from 'lucide-react';
 
 export const MintSection = ({
@@ -28,51 +28,52 @@ export const MintSection = ({
   claimFaucetTokens,
   isClaimingFaucet
 }) => {
-  const [showHelp, setShowHelp] = useState(false);
   const userTokens = parseFloat(tokenBalance || '0');
   const requiredTokens = 5.0;
   const progressPercent = Math.min((userTokens / requiredTokens) * 100, 100);
 
   return (
-    <div className="glass-panel-glow p-6 sm:p-8 space-y-7 relative overflow-hidden">
-      {/* Decorative ambient gradients */}
-      <div className="absolute -top-24 -left-24 w-72 h-72 bg-purple-600/15 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-24 -right-24 w-72 h-72 bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+    <div className="cyber-card-glow p-6 sm:p-9 space-y-8 relative overflow-hidden">
+      {/* Decorative ambient lights */}
+      <div className="absolute -top-32 -left-32 w-80 h-80 bg-purple-600/20 rounded-full blur-[100px] pointer-events-none" />
+      <div className="absolute -bottom-32 -right-32 w-80 h-80 bg-cyan-600/15 rounded-full blur-[100px] pointer-events-none" />
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-5">
+      {/* Header bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/[0.08] pb-6">
         <div>
-          <div className="flex items-center gap-2">
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-              Deposit & Mint NFT
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
+              Mint <span className="gradient-neon">Fuzail NFT</span>
             </h2>
-            <span className="px-2.5 py-0.5 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-semibold">
-              Instant On-Chain
+            <span className="flex items-center gap-1 px-3 py-1 rounded-full bg-purple-500/15 border border-purple-500/30 text-purple-300 text-xs font-bold tracking-wide">
+              <Flame className="w-3.5 h-3.5 text-pink-400" />
+              <span>Instant Mint</span>
             </span>
           </div>
-          <p className="text-sm text-gray-400 mt-1">
-            Deposit exactly 5 FZT to automatically mint 1 exclusive Fuzail NFT directly to your wallet.
+          <p className="text-sm text-slate-400 mt-1.5 leading-relaxed">
+            Deposit exactly 5 FZT to automatically execute the on-chain mint transaction.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Faucet & Sync Buttons */}
+        <div className="flex items-center gap-2.5 self-start sm:self-auto">
           {claimFaucetTokens && (
             <button
               onClick={claimFaucetTokens}
               disabled={isClaimingFaucet}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/30 text-purple-300 text-xs font-medium transition-all"
-              title="Claim 100 FZT test tokens if you are the contract deployer or owner"
+              className="btn-cyber-secondary flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold text-purple-300 border-purple-500/30 hover:bg-purple-500/20 transition-all shadow-lg shadow-purple-900/20"
+              title="Claim 100 Test FZT Tokens to test minting immediately"
             >
-              <Gift className="w-3.5 h-3.5" />
-              <span>{isClaimingFaucet ? 'Minting...' : 'Get Test FZT'}</span>
+              <Gift className="w-4 h-4 text-pink-400" />
+              <span>{isClaimingFaucet ? 'Claiming 100 FZT...' : '⚡ Get 100 Test FZT'}</span>
             </button>
           )}
 
           <button
             onClick={refreshData}
             disabled={loadingData}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-gray-300 text-xs transition-all"
-            title="Refresh blockchain data"
+            className="btn-cyber-secondary flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs text-slate-300"
+            title="Refresh on-chain state"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${loadingData ? 'animate-spin' : ''}`} />
             <span>Sync</span>
@@ -80,145 +81,164 @@ export const MintSection = ({
         </div>
       </div>
 
-      {/* Interactive Visual Exchange Box */}
-      <div className="grid grid-cols-1 md:grid-cols-5 gap-4 items-center">
-        {/* Left: 5 FZT Input */}
-        <div className="md:col-span-2 glass-panel p-5 border-purple-500/20 hover:border-purple-500/40 transition-all">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-            <span>YOU DEPOSIT</span>
+      {/* Interactive Visual Swap Card */}
+      <div className="grid grid-cols-1 md:grid-cols-11 gap-4 items-center">
+        {/* Left Side: You Pay (5 FZT) */}
+        <div className="md:col-span-5 cyber-card p-6 border-purple-500/20 group hover:border-purple-500/50">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium mb-3">
+            <span className="uppercase tracking-wider">You Deposit</span>
             <span className="font-mono text-purple-300">
-              Bal: {userTokens.toFixed(2)} FZT
+              Balance: {userTokens.toLocaleString('en-US', { maximumFractionDigits: 2 })} FZT
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-3xl font-extrabold text-white font-mono">5.0</span>
-            <div className="flex items-center gap-2 bg-purple-500/20 border border-purple-500/30 px-3 py-1.5 rounded-xl">
-              <Coins className="w-4 h-4 text-purple-400" />
-              <span className="font-bold text-white text-sm">FZT</span>
+
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-4xl sm:text-5xl font-black text-white font-mono tracking-tight">
+              5.0
+            </span>
+            <div className="flex items-center gap-2.5 bg-gradient-to-r from-purple-900/40 to-indigo-900/40 border border-purple-500/40 px-4 py-2.5 rounded-2xl shadow-inner">
+              <div className="w-6 h-6 rounded-lg bg-purple-500 flex items-center justify-center text-white shadow-sm">
+                <Coins className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-extrabold text-white text-base tracking-wide">FZT</span>
             </div>
           </div>
-          {/* Balance progress */}
-          <div className="mt-4">
-            <div className="flex justify-between text-[11px] text-gray-400 mb-1">
-              <span>Token Balance Check</span>
-              <span className={hasEnoughTokens ? 'text-emerald-400 font-semibold' : 'text-amber-400 font-semibold'}>
-                {hasEnoughTokens ? 'Sufficient Balance' : 'Insufficient (Need 5 FZT)'}
+
+          {/* Balance check meter */}
+          <div className="mt-5 space-y-1.5">
+            <div className="flex justify-between text-[11px]">
+              <span className="text-slate-400">Deposit Requirement</span>
+              <span className={hasEnoughTokens ? 'text-emerald-400 font-bold' : 'text-amber-400 font-bold'}>
+                {hasEnoughTokens ? '✓ 5 FZT Ready' : 'Need 5 FZT (Use Faucet)'}
               </span>
             </div>
-            <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+            <div className="h-2 w-full bg-black/40 rounded-full overflow-hidden p-0.5 border border-white/5">
               <div 
-                className={`h-full transition-all duration-500 ${hasEnoughTokens ? 'bg-gradient-to-r from-purple-500 to-emerald-400' : 'bg-amber-500'}`}
+                className={`h-full rounded-full transition-all duration-700 ${
+                  hasEnoughTokens 
+                    ? 'bg-gradient-to-r from-purple-500 via-indigo-500 to-emerald-400' 
+                    : 'bg-gradient-to-r from-amber-500 to-rose-500'
+                }`}
                 style={{ width: `${progressPercent}%` }}
               />
             </div>
           </div>
         </div>
 
-        {/* Center: Interactive Arrow & Rate */}
+        {/* Center: Exchange Arrow */}
         <div className="md:col-span-1 flex flex-col items-center justify-center py-2">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-600/30 text-white animate-pulse-subtle">
-            <ArrowRight className="w-5 h-5 md:rotate-0 rotate-90" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-cyan-500 flex items-center justify-center text-white shadow-xl shadow-purple-600/30">
+            <ArrowRight className="w-5 h-5 hidden md:block" />
+            <ArrowDown className="w-5 h-5 md:hidden" />
           </div>
-          <span className="text-[11px] text-gray-400 mt-2 font-mono">1 : 1 Mint</span>
+          <span className="text-[10px] font-mono text-slate-400 mt-2 font-bold uppercase tracking-wider">
+            1:1 Mint
+          </span>
         </div>
 
-        {/* Right: 1 FZNFT Output */}
-        <div className="md:col-span-2 glass-panel p-5 border-blue-500/20 hover:border-blue-500/40 transition-all">
-          <div className="flex items-center justify-between text-xs text-gray-400 mb-2">
-            <span>YOU RECEIVE</span>
-            <span className="text-emerald-400 font-semibold flex items-center gap-1">
+        {/* Right Side: You Receive (1 FZNFT) */}
+        <div className="md:col-span-5 cyber-card p-6 border-cyan-500/20 group hover:border-cyan-500/50">
+          <div className="flex items-center justify-between text-xs text-slate-400 font-medium mb-3">
+            <span className="uppercase tracking-wider">You Receive</span>
+            <span className="text-cyan-400 font-semibold flex items-center gap-1 font-mono">
               <ShieldCheck className="w-3.5 h-3.5" /> ERC-721
             </span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-3xl font-extrabold text-white font-mono">1.0</span>
-            <div className="flex items-center gap-2 bg-blue-500/20 border border-blue-500/30 px-3 py-1.5 rounded-xl">
-              <Sparkles className="w-4 h-4 text-blue-400" />
-              <span className="font-bold text-white text-sm">FZNFT</span>
+
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-4xl sm:text-5xl font-black text-white font-mono tracking-tight">
+              1.0
+            </span>
+            <div className="flex items-center gap-2.5 bg-gradient-to-r from-cyan-900/40 to-blue-900/40 border border-cyan-500/40 px-4 py-2.5 rounded-2xl shadow-inner">
+              <div className="w-6 h-6 rounded-lg bg-cyan-500 flex items-center justify-center text-white shadow-sm">
+                <Sparkles className="w-3.5 h-3.5" />
+              </div>
+              <span className="font-extrabold text-white text-base tracking-wide">FZNFT</span>
             </div>
           </div>
-          <div className="mt-4 flex items-center justify-between text-[11px] text-gray-400">
-            <span>Metadata: Unique Token ID</span>
-            <span className="text-blue-300 font-mono">Verified Contract</span>
+
+          <div className="mt-5 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+            <span>Direct to your wallet</span>
+            <span className="text-cyan-300 font-bold">Verifiable Ownership</span>
           </div>
         </div>
       </div>
 
       {/* Step by Step Flow Indicator */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Step 1 Box */}
-        <div className={`p-4 rounded-xl border transition-all ${
+        {/* Step 1: Allowance */}
+        <div className={`p-5 rounded-2xl border transition-all ${
           hasEnoughAllowance 
-            ? 'bg-emerald-500/5 border-emerald-500/30 text-emerald-300' 
-            : 'bg-purple-500/5 border-purple-500/30 text-purple-300'
+            ? 'bg-emerald-500/[0.06] border-emerald-500/30' 
+            : 'bg-purple-500/[0.06] border-purple-500/30'
         }`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                hasEnoughAllowance ? 'bg-emerald-500 text-black' : 'bg-purple-500 text-white'
+            <div className="flex items-center gap-3">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shadow-md ${
+                hasEnoughAllowance ? 'bg-emerald-500 text-black' : 'bg-purple-600 text-white'
               }`}>
                 {hasEnoughAllowance ? '✓' : '1'}
               </div>
-              <span className="text-sm font-semibold">Step 1: Approve 5 FZT</span>
+              <span className="text-sm font-bold text-white">Step 1: Approve 5 FZT</span>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+            <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
               hasEnoughAllowance 
-                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' 
-                : 'bg-purple-500/20 text-purple-300 border border-purple-500/30'
+                ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' 
+                : 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
             }`}>
               {hasEnoughAllowance ? 'Approved' : 'Required'}
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            Permits the exchange contract to transfer exactly 5 FZT on deposit.
+          <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+            Permits the smart contract to pull exactly 5 FZT when you click deposit.
           </p>
         </div>
 
-        {/* Step 2 Box */}
-        <div className={`p-4 rounded-xl border transition-all ${
+        {/* Step 2: Mint */}
+        <div className={`p-5 rounded-2xl border transition-all ${
           hasEnoughAllowance 
-            ? 'bg-blue-500/10 border-blue-500/40 text-blue-300' 
-            : 'bg-white/5 border-white/10 text-gray-500'
+            ? 'bg-cyan-500/[0.06] border-cyan-500/30' 
+            : 'bg-white/[0.02] border-white/[0.08] opacity-60'
         }`}>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                hasEnoughAllowance ? 'bg-blue-500 text-white' : 'bg-gray-700 text-gray-400'
+            <div className="flex items-center gap-3">
+              <div className={`w-7 h-7 rounded-xl flex items-center justify-center text-xs font-black shadow-md ${
+                hasEnoughAllowance ? 'bg-cyan-500 text-black' : 'bg-slate-700 text-slate-400'
               }`}>
                 2
               </div>
-              <span className="text-sm font-semibold">Step 2: Deposit & Mint</span>
+              <span className="text-sm font-bold text-white">Step 2: Deposit & Mint</span>
             </div>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+            <span className={`text-[11px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider ${
               hasEnoughAllowance 
-                ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' 
-                : 'bg-white/5 text-gray-500 border border-white/10'
+                ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40' 
+                : 'bg-white/5 text-slate-500 border border-white/10'
             }`}>
-              {hasEnoughAllowance ? 'Ready' : 'Locked'}
+              {hasEnoughAllowance ? 'Ready to Mint' : 'Locked'}
             </span>
           </div>
-          <p className="text-xs text-gray-400 mt-2">
-            Transfers 5 tokens and directly mints 1 NFT to your wallet in one atomic transaction.
+          <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+            Transfers 5 tokens and automatically mints 1 NFT to your wallet in 1 atomic transaction.
           </p>
         </div>
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex flex-col sm:flex-row gap-3 pt-2">
+      {/* Main Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-1">
         {!hasEnoughAllowance ? (
           <button
             onClick={approveTokens}
             disabled={isApproving || !hasEnoughTokens}
-            className="btn-gradient flex-1 py-3.5 px-6 rounded-xl text-sm font-semibold flex items-center justify-center gap-2"
+            className="btn-cyber-primary flex-1 py-4 px-8 rounded-2xl text-base font-extrabold flex items-center justify-center gap-3 shadow-purple-600/50"
           >
             {isApproving ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="w-5 h-5 animate-spin" />
                 <span>Waiting for MetaMask Approval...</span>
               </>
             ) : (
               <>
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-5 h-5" />
                 <span>Approve 5 FZT Tokens</span>
               </>
             )}
@@ -227,16 +247,16 @@ export const MintSection = ({
           <button
             onClick={mintNFT}
             disabled={isMinting || !hasEnoughTokens}
-            className="btn-gradient flex-1 py-3.5 px-6 rounded-xl text-sm font-semibold flex items-center justify-center gap-2 shadow-purple-600/40"
+            className="btn-cyber-primary flex-1 py-4 px-8 rounded-2xl text-base font-extrabold flex items-center justify-center gap-3 shadow-cyan-600/50"
           >
             {isMinting ? (
               <>
-                <RefreshCw className="w-4 h-4 animate-spin" />
+                <RefreshCw className="w-5 h-5 animate-spin" />
                 <span>Minting NFT on Blockchain...</span>
               </>
             ) : (
               <>
-                <Zap className="w-4 h-4 fill-white" />
+                <Zap className="w-5 h-5 fill-white" />
                 <span>Deposit 5 FZT & Mint 1 FZNFT</span>
               </>
             )}
@@ -244,13 +264,16 @@ export const MintSection = ({
         )}
       </div>
 
-      {/* Transaction status alert */}
+      {/* Transaction Success Drawer */}
       {txHash && (
-        <div className="glass-panel p-4 border-purple-500/30 bg-purple-950/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-gray-300">Transaction Broadcasted:</span>
-            <span className="font-mono text-purple-300">
+        <div className="cyber-card p-4 border-purple-500/40 bg-purple-950/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+          <div className="flex items-center gap-2.5">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="text-slate-300 font-medium">Broadcasted:</span>
+            <span className="font-mono text-purple-300 font-bold">
               {txHash.slice(0, 10)}...{txHash.slice(-8)}
             </span>
           </div>
@@ -258,30 +281,30 @@ export const MintSection = ({
             href={`https://sepolia.etherscan.io/tx/${txHash}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1 text-purple-400 hover:text-purple-300 font-medium"
+            className="flex items-center gap-1.5 text-purple-300 hover:text-white font-bold underline"
           >
-            <span>View on Sepolia Etherscan</span>
+            <span>View on Etherscan</span>
             <ExternalLink className="w-3.5 h-3.5" />
           </a>
         </div>
       )}
 
-      {/* Contract Verification Info Footer */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/5 text-[11px] text-gray-500 font-mono">
+      {/* Contract Verification Footer */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2 border-t border-white/[0.06] text-[11px] text-slate-500 font-mono">
         <div>
-          <span>Exchange Contract: </span>
+          <span>Contract: </span>
           <a
             href={`https://sepolia.etherscan.io/address/${EXCHANGE_ADDRESS}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-gray-400 hover:text-purple-300 transition-colors"
+            className="text-slate-400 hover:text-purple-300 transition-colors underline"
           >
             {EXCHANGE_ADDRESS}
           </a>
         </div>
         <div className="flex items-center gap-3">
-          <span>Standard: ERC-20 ⇄ ERC-721</span>
-          <span>Security: ReentrancyGuard</span>
+          <span>ERC-20 ⇄ ERC-721</span>
+          <span>ReentrancyGuard Protected</span>
         </div>
       </div>
     </div>

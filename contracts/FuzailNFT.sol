@@ -6,32 +6,40 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 /**
  * @title FuzailNFT
- * @dev ERC-721 NFT: Fuzail NFT (FZNFT)
- * Only the contract owner (TokenToNFT exchange) can mint NFTs.
- * Each NFT has a unique token ID and supports tokenURI metadata.
+ * @dev Dynamic ERC-721 NFT collection supporting custom name, symbol, max supply, and base URI.
+ * Only the contract owner (Exchange contract) can mint NFTs.
  */
 contract FuzailNFT is ERC721URIStorage, Ownable {
     uint256 private _nextTokenId;
     string private _baseTokenURI;
+    uint256 public immutable maxSupply; // 0 = unlimited
 
     event NFTMinted(address indexed recipient, uint256 indexed tokenId, string tokenURI);
 
-    constructor(string memory baseURI) ERC721("Fuzail NFT", "FZNFT") Ownable(msg.sender) {
-        _baseTokenURI = baseURI;
+    constructor(
+        string memory name_,
+        string memory symbol_,
+        uint256 maxSupply_,
+        string memory baseURI_,
+        address initialOwner_
+    ) ERC721(name_, symbol_) Ownable(initialOwner_) {
+        maxSupply = maxSupply_;
+        _baseTokenURI = baseURI_;
         _nextTokenId = 1;
     }
 
     /**
-     * @dev Mint one NFT to the recipient. Only callable by the owner (exchange contract).
-     * @param recipient The wallet that will receive the NFT.
-     * @param tokenURI_ Metadata URI for the NFT.
-     * @return tokenId The newly minted token ID.
+     * @dev Mint one NFT to the recipient. Only callable by the owner (Exchange contract).
      */
     function mintNFT(address recipient, string memory tokenURI_)
         external
         onlyOwner
         returns (uint256)
     {
+        if (maxSupply > 0) {
+            require(_nextTokenId <= maxSupply, "FuzailNFT: max supply reached");
+        }
+
         uint256 tokenId = _nextTokenId;
         _nextTokenId++;
 
@@ -42,23 +50,14 @@ contract FuzailNFT is ERC721URIStorage, Ownable {
         return tokenId;
     }
 
-    /**
-     * @dev Returns the total number of NFTs minted so far.
-     */
     function totalMinted() external view returns (uint256) {
         return _nextTokenId - 1;
     }
 
-    /**
-     * @dev Returns the next token ID that will be assigned.
-     */
     function nextTokenId() external view returns (uint256) {
         return _nextTokenId;
     }
 
-    /**
-     * @dev Update the base URI (owner only).
-     */
     function setBaseURI(string memory baseURI) external onlyOwner {
         _baseTokenURI = baseURI;
     }
