@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="tile" x1="8" y1="7" x2="57" y2="59" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#211044"/>
+      <stop offset="1" stop-color="#0b1021"/>
+    </linearGradient>
+    <linearGradient id="gem" x1="17" y1="15" x2="48" y2="49" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ed8cff"/>
+      <stop offset=".52" stop-color="#9b5cff"/>
+      <stop offset="1" stop-color="#4ddcff"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="17" fill="url(#tile)"/>
+  <path d="m22 16 20 0 10 11-20 25-20-25 10-11Z" fill="url(#gem)" stroke="#f4d8ff" stroke-linejoin="round" stroke-width="2"/>
+  <path d="m12 27 20 1 20-1M22 16l10 12 10-12M32 28v24" fill="none" stroke="#fff" stroke-linejoin="round" stroke-opacity=".7" stroke-width="1.5"/>
+  <path d="m32 28 10-12 10 11-20 25V28Z" fill="#54dcff" fill-opacity=".2"/>
+  <path d="M49 10v7m-3.5-3.5h7" stroke="#fff" stroke-linecap="round" stroke-opacity=".9" stroke-width="1.5"/>
+</svg>
