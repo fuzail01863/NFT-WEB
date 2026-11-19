@@ -1,22 +1,110 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
+
+// Standard Hardhat Local test account #0 (pre-funded with 10,000 ETH)
+export const HARDHAT_DEFAULT_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+
+// Public RPC endpoints
+const SEPOLIA_RPC = 'https://ethereum-sepolia-rpc.publicnode.com';
+const LOCALHOST_RPC = 'http://127.0.0.1:8545';
 
 export const useWallet = () => {
   const [account, setAccount] = useState(null);
   const [provider, setProvider] = useState(null);
   const [signer, setSigner] = useState(null);
-  const [chainId, setChainId] = useState(null);
+  const [chainId, setChainId] = useState(11155111);
+  const [walletType, setWalletType] = useState(null); // 'in-app' | 'metamask' | null
+  const [privateKey, setPrivateKey] = useState(null);
+  const [ethBalance, setEthBalance] = useState('0.00');
+
   const [isConnecting, setIsConnecting] = useState(false);
   const [error, setError] = useState(null);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
 
   const REQUIRED_CHAIN_ID = import.meta.env.VITE_CHAIN_ID
     ? parseInt(import.meta.env.VITE_CHAIN_ID)
     : 11155111;
 
-  // Initialize wallet connection
-  const connectWallet = useCallback(async () => {
+  // Helper to get fallback RPC provider for in-app wallet
+  const getRpcProvider = useCallback(async (targetChainId) => {
+    const isLocal = targetChainId === 31337;
+    const rpcUrl = isLocal ? LOCALHOST_RPC : SEPOLIA_RPC;
+    try {
+      const rpc = new ethers.JsonRpcProvider(rpcUrl);
+      return rpc;
+    } catch {
+      return new ethers.JsonRpcProvider(SEPOLIA_RPC);
+    }
+  }, []);
+
+  // Refresh native ETH balance
+  const refreshEthBalance = useCallback(async (userAccount, userProvider) => {
+    if (!userAccount || !userProvider) return;
+    try {
+      const bal = await userProvider.getBalance(userAccount);
+      setEthBalance(parseFloat(ethers.formatEther(bal)).toFixed(4));
+    } catch {
+      setEthBalance('0.00');
+    }
+  }, []);
+
+  // ── 1. In-App Wallet Creation & Loading ──────────────────────────────────
+  const setupInAppWallet = useCallback(async (pk, targetChainId = 11155111) => {
+    setIsConnecting(true);
+    setError(null);
+    try {
+      const rpc = await getRpcProvider(targetChainId);
+      const inAppSigner = new ethers.Wallet(pk, rpc);
+      const addr = inAppSigner.address;
+
+      localStorage.setItem('fuzail_inapp_pk', pk);
+      localStorage.setItem('fuzail_wallet_type', 'in-app');
+
+      setAccount(addr);
+      setPrivateKey(pk);
+      setSigner(inAppSigner);
+      setProvider(rpc);
+      setChainId(targetChainId);
+      setWalletType('in-app');
+
+      refreshEthBalance(addr, rpc);
+      setIsWalletModalOpen(false);
+    } catch (err) {
+      setError(err.reason || err.message || 'Failed to initialize in-app wallet');
+    } finally {
+      setIsConnecting(false);
+    }
+  }, [getRpcProvider, refreshEthBalance]);
+
+  // Create brand new random in-app wallet
+  const createInAppWallet = useCallback(async () => {
+    const randomWallet = ethers.Wallet.createRandom();
+    await setupInAppWallet(randomWallet.privateKey, chainId || 11155111);
+  }, [setupInAppWallet, chainId]);
+
+  // Import private key into in-app wallet
+  const importInAppWallet = useCallback(async (keyInput) => {
+    let cleanKey = keyInput.trim();
+    if (!cleanKey.startsWith('0x') && cleanKey.length === 64) {
+      cleanKey = '0x' + cleanKey;
+    }
+    try {
+      new ethers.Wallet(cleanKey); // Validate key
+      await setupInAppWallet(cleanKey, chainId || 11155111);
+    } catch (err) {
+      setError('Invalid Private Key. Please provide a valid 64-character hex key.');
+    }
+  }, [setupInAppWallet, chainId]);
+
+  // Use pre-funded Hardhat Account #0
+  const useHardhatAccount = useCallback(async () => {
+    await setupInAppWallet(HARDHAT_DEFAULT_KEY, 31337);
+  }, [setupInAppWallet]);
+
+  // ── 2. MetaMask Wallet Connection ───────────────────────────────────────
+  const connectMetaMask = useCallback(async () => {
     if (!window.ethereum) {
-      setError('MetaMask is not installed. Please install MetaMask extension to continue.');
+      setError('MetaMask extension is not installed. You can use the built-in In-App Wallet instead!');
       return;
     }
 
@@ -24,112 +112,147 @@ export const useWallet = () => {
     setError(null);
 
     try {
-      // 1. First check if accounts are already accessible to avoid -32002 duplicate request
-      const existingAccounts = await window.ethereum.request({ method: 'eth_accounts' });
-      let targetAccount;
-
-      if (existingAccounts && existingAccounts.length > 0) {
-        targetAccount = existingAccounts[0];
-      } else {
-        // Request accounts only when not already authorized
-        const requested = await window.ethereum.request({ method: 'eth_requestAccounts' });
-        targetAccount = requested[0];
-      }
-
-      if (!targetAccount) {
-        throw new Error('No Ethereum account selected.');
+      const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (!accounts || accounts.length === 0) {
+        throw new Error('No account authorized.');
       }
 
       const web3Provider = new ethers.BrowserProvider(window.ethereum);
       const web3Signer = await web3Provider.getSigner();
       const network = await web3Provider.getNetwork();
 
-      setProvider(web3Provider);
+      localStorage.setItem('fuzail_wallet_type', 'metamask');
+      localStorage.removeItem('fuzail_inapp_pk');
+
+      setAccount(accounts[0]);
       setSigner(web3Signer);
-      setAccount(targetAccount);
+      setProvider(web3Provider);
       setChainId(Number(network.chainId));
-      setError(null);
+      setWalletType('metamask');
+      setPrivateKey(null);
+
+      refreshEthBalance(accounts[0], web3Provider);
+      setIsWalletModalOpen(false);
     } catch (err) {
-      console.warn('Wallet connection warning/error:', err);
-      // Gracefully handle the -32002 "Request already pending" error
-      if (err.code === -32002 || (err.message && err.message.includes('-32002'))) {
-        setError('A MetaMask request is already open in your browser extension. Please click the MetaMask fox icon to approve or unlock.');
-      } else if (err.code === 4001) {
-        setError('Connection request cancelled. Please connect your MetaMask to use the DApp.');
+      if (err.code === 4001) {
+        setError('Connection request cancelled.');
       } else {
-        setError(err.reason || err.message || 'Unable to connect to MetaMask');
+        setError(err.reason || err.message || 'Failed to connect MetaMask');
       }
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [refreshEthBalance]);
 
+  // ── 3. Disconnect ────────────────────────────────────────────────────────
   const disconnectWallet = useCallback(() => {
+    localStorage.removeItem('fuzail_wallet_type');
+    localStorage.removeItem('fuzail_inapp_pk');
     setAccount(null);
     setProvider(null);
     setSigner(null);
-    setChainId(null);
+    setWalletType(null);
+    setPrivateKey(null);
+    setEthBalance('0.00');
     setError(null);
   }, []);
 
+  // ── 4. Network Switching ────────────────────────────────────────────────
   const switchToSepolia = useCallback(async () => {
-    if (!window.ethereum) return;
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: `0x${REQUIRED_CHAIN_ID.toString(16)}` }],
-      });
-    } catch (switchError) {
-      if (switchError.code === 4902) {
+    if (walletType === 'in-app' && privateKey) {
+      await setupInAppWallet(privateKey, 11155111);
+      return;
+    }
+    if (window.ethereum) {
+      try {
         await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{
-            chainId: `0x${REQUIRED_CHAIN_ID.toString(16)}`,
-            chainName: 'Sepolia Testnet',
-            nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
-            rpcUrls: ['https://rpc.sepolia.org', 'https://ethereum-sepolia-rpc.publicnode.com'],
-            blockExplorerUrls: ['https://sepolia.etherscan.io'],
-          }],
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0xaa36a7' }],
         });
+      } catch (err) {
+        if (err.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0xaa36a7',
+              chainName: 'Sepolia Testnet',
+              nativeCurrency: { name: 'Sepolia ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: [SEPOLIA_RPC],
+              blockExplorerUrls: ['https://sepolia.etherscan.io'],
+            }],
+          });
+        }
       }
     }
-  }, [REQUIRED_CHAIN_ID]);
+  }, [walletType, privateKey, setupInAppWallet]);
 
-  // Silent account check on mount (do NOT trigger eth_requestAccounts automatically)
-  useEffect(() => {
-    if (!window.ethereum) return;
-
-    let mounted = true;
-
-    window.ethereum.request({ method: 'eth_accounts' })
-      .then(async (accounts) => {
-        if (mounted && accounts && accounts.length > 0) {
-          try {
-            const web3Provider = new ethers.BrowserProvider(window.ethereum);
-            const web3Signer = await web3Provider.getSigner();
-            const network = await web3Provider.getNetwork();
-            setProvider(web3Provider);
-            setSigner(web3Signer);
-            setAccount(accounts[0]);
-            setChainId(Number(network.chainId));
-          } catch (e) {
-            console.debug('Silent account restore skipped:', e);
-          }
+  const switchToLocalhost = useCallback(async () => {
+    if (walletType === 'in-app' && privateKey) {
+      await setupInAppWallet(privateKey, 31337);
+      return;
+    }
+    if (window.ethereum) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: '0x7a69' }],
+        });
+      } catch (err) {
+        if (err.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: '0x7a69',
+              chainName: 'Hardhat Localhost',
+              nativeCurrency: { name: 'Local ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: [LOCALHOST_RPC],
+            }],
+          });
         }
-      })
-      .catch((e) => console.debug('eth_accounts check error:', e));
+      }
+    }
+  }, [walletType, privateKey, setupInAppWallet]);
 
-    const handleAccountsChanged = async (accounts) => {
+  // ── 5. Auto Restore on Mount ────────────────────────────────────────────
+  useEffect(() => {
+    const savedType = localStorage.getItem('fuzail_wallet_type');
+    const savedPk = localStorage.getItem('fuzail_inapp_pk');
+
+    if (savedType === 'in-app' && savedPk) {
+      setupInAppWallet(savedPk, 11155111);
+      return;
+    }
+
+    if (savedType === 'metamask' && window.ethereum) {
+      window.ethereum.request({ method: 'eth_accounts' })
+        .then(async (accounts) => {
+          if (accounts && accounts.length > 0) {
+            try {
+              const web3Provider = new ethers.BrowserProvider(window.ethereum);
+              const web3Signer = await web3Provider.getSigner();
+              const network = await web3Provider.getNetwork();
+              setAccount(accounts[0]);
+              setSigner(web3Signer);
+              setProvider(web3Provider);
+              setChainId(Number(network.chainId));
+              setWalletType('metamask');
+              refreshEthBalance(accounts[0], web3Provider);
+            } catch {}
+          }
+        })
+        .catch(() => {});
+    }
+  }, [setupInAppWallet, refreshEthBalance]);
+
+  // MetaMask event listeners
+  useEffect(() => {
+    if (!window.ethereum || walletType !== 'metamask') return;
+
+    const handleAccountsChanged = (accounts) => {
       if (!accounts || accounts.length === 0) {
         disconnectWallet();
       } else {
         setAccount(accounts[0]);
-        try {
-          const web3Provider = new ethers.BrowserProvider(window.ethereum);
-          const web3Signer = await web3Provider.getSigner();
-          setProvider(web3Provider);
-          setSigner(web3Signer);
-        } catch {}
       }
     };
 
@@ -141,33 +264,44 @@ export const useWallet = () => {
     window.ethereum.on('chainChanged', handleChainChanged);
 
     return () => {
-      mounted = false;
-      if (window.ethereum.removeListener) {
+      if (window.ethereum?.removeListener) {
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
         window.ethereum.removeListener('chainChanged', handleChainChanged);
       }
     };
-  }, [disconnectWallet]);
+  }, [walletType, disconnectWallet]);
 
   const shortAddress = account
     ? `${account.slice(0, 6)}...${account.slice(-4)}`
     : null;
 
-  const isCorrectNetwork = chainId === REQUIRED_CHAIN_ID;
+  const isCorrectNetwork = chainId === 11155111 || chainId === 31337;
 
   return {
     account,
     provider,
     signer,
     chainId,
+    walletType,
+    privateKey,
+    ethBalance,
     isConnecting,
     error,
     shortAddress,
     isCorrectNetwork,
     REQUIRED_CHAIN_ID,
-    connectWallet,
+    isWalletModalOpen,
+    openWalletModal: () => setIsWalletModalOpen(true),
+    closeWalletModal: () => setIsWalletModalOpen(false),
+    connectWallet: () => setIsWalletModalOpen(true), // Opens in-app wallet selection modal
+    connectMetaMask,
+    createInAppWallet,
+    importInAppWallet,
+    useHardhatAccount,
     disconnectWallet,
     switchToSepolia,
+    switchToLocalhost,
+    refreshEthBalance: () => refreshEthBalance(account, provider),
     clearError: () => setError(null),
   };
 };

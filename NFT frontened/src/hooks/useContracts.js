@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ethers } from 'ethers';
 import { 
   FACTORY_ADDRESS, 
@@ -38,15 +38,27 @@ export const useContracts = (signer, provider, account) => {
   const [notification, setNotification] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
 
-  const showNotification = (type, message) => {
-    setNotification({ type, message, id: Date.now() });
-    setTimeout(() => setNotification(null), 7000);
-  };
+  const isRefreshingRef = useRef(false);
 
-  // 1. Initialize Factory
+  const showNotification = useCallback((type, message) => {
+    setNotification({ type, message, id: Date.now() });
+    setTimeout(() => setNotification(null), 6000);
+  }, []);
+
+  // Safe check if contract bytecode exists
+  const checkContractExists = useCallback(async (address) => {
+    if (!address || address === ethers.ZeroAddress || !provider) return false;
+    try {
+      const code = await provider.getCode(address);
+      return code && code !== '0x' && code !== '0x0';
+    } catch {
+      return false;
+    }
+  }, [provider]);
+
+  // 1. Initialize Factory Contract silently
   useEffect(() => {
-    if (!provider || !FACTORY_ADDRESS || FACTORY_ADDRESS === '0x0000000000000000000000000000000000000000') {
-      // Fallback to default initial project if factory address not set
+    if (!provider || !FACTORY_ADDRESS || FACTORY_ADDRESS === ethers.ZeroAddress) {
       if (INITIAL_PROJECT) {
         setProjects([{
           ...INITIAL_PROJECT,
@@ -56,19 +68,36 @@ export const useContracts = (signer, provider, account) => {
       return;
     }
 
-    try {
-      const runner = signer || provider;
-      const factory = new ethers.Contract(FACTORY_ADDRESS, PROJECT_FACTORY_ABI, runner);
-      setFactoryContract(factory);
-    } catch (err) {
-      console.warn('Factory init error:', err);
-    }
-  }, [signer, provider]);
+    let isMounted = true;
+    const initFactory = async () => {
+      const exists = await checkContractExists(FACTORY_ADDRESS);
+      if (!isMounted) return;
 
-  // 2. Fetch all projects from Factory
+      if (!exists) {
+        if (INITIAL_PROJECT) {
+          setProjects([{
+            ...INITIAL_PROJECT,
+            formattedRate: ethers.formatEther(INITIAL_PROJECT.tokensPerNFT || ethers.parseEther('5')),
+          }]);
+        }
+        return;
+      }
+
+      try {
+        const runner = signer || provider;
+        const factory = new ethers.Contract(FACTORY_ADDRESS, PROJECT_FACTORY_ABI, runner);
+        setFactoryContract(factory);
+      } catch {}
+    };
+
+    initFactory();
+    return () => { isMounted = false; };
+  }, [signer, provider, checkContractExists]);
+
+  // 2. Fetch projects from Factory
   const refreshProjects = useCallback(async () => {
     if (!factoryContract) {
-      if (INITIAL_PROJECT) {
+      if (INITIAL_PROJECT && projects.length === 0) {
         setProjects([{
           ...INITIAL_PROJECT,
           formattedRate: ethers.formatEther(INITIAL_PROJECT.tokensPerNFT || ethers.parseEther('5')),
@@ -97,26 +126,22 @@ export const useContracts = (signer, provider, account) => {
           baseMetadataURI: p.baseMetadataURI,
         }));
         setProjects(formatted);
-      } else if (INITIAL_PROJECT) {
-        setProjects([{
-          ...INITIAL_PROJECT,
-          formattedRate: ethers.formatEther(INITIAL_PROJECT.tokensPerNFT || ethers.parseEther('5')),
-        }]);
       }
-    } catch (err) {
-      console.warn('Fetch projects error, falling back to initial project:', err);
-      if (INITIAL_PROJECT) {
+    } catch {
+      if (INITIAL_PROJECT && projects.length === 0) {
         setProjects([{
           ...INITIAL_PROJECT,
           formattedRate: ethers.formatEther(INITIAL_PROJECT.tokensPerNFT || ethers.parseEther('5')),
         }]);
       }
     }
-  }, [factoryContract]);
+  }, [factoryContract, projects.length]);
 
   useEffect(() => {
-    refreshProjects();
-  }, [refreshProjects]);
+    if (factoryContract) {
+      refreshProjects();
+    }
+  }, [factoryContract, refreshProjects]);
 
   // 3. Bind contracts for selected project
   const currentProject = projects.find((p) => p.projectId === selectedProjectId) || projects[0] || INITIAL_PROJECT;
@@ -133,25 +158,35 @@ export const useContracts = (signer, provider, account) => {
       setTokenContract(token);
       setNFTContract(nft);
       setExchangeContract(exchange);
-      setRequiredTokensRaw(BigInt(currentProject.tokensPerNFT || ethers.parseEther('5')));
-    } catch (err) {
-      console.warn('Selected project contracts init error:', err);
-    }
-  }, [currentProject, signer, provider]);
+    } catch {}
+  }, [currentProject?.projectId, currentProject?.tokenAddress, currentProject?.nftAddress, currentProject?.exchangeAddress, signer, provider]);
 
-  // 4. Refresh balances and data
+  // 4. Refresh balances and data cleanly
   const refreshData = useCallback(async () => {
-    if (!tokenContract || !nftContract || !exchangeContract || !account) return;
+    if (!tokenContract || !nftContract || !exchangeContract || !account || !provider) return;
+    if (isRefreshingRef.current) return;
 
+    isRefreshingRef.current = true;
     setLoadingData(true);
+
     try {
+      const exists = await checkContractExists(currentProject.exchangeAddress);
+      if (!exists) {
+        // Safe default state when contracts aren't deployed on this specific chain
+        setTokenBalance('0');
+        setNFTBalance('0');
+        setTotalMinted('0');
+        setAllowance('0');
+        return;
+      }
+
       const decimals = currentProject?.tokenDecimals || 18;
       const [tokenBal, nftBal, minted, allow, reqTokens] = await Promise.all([
-        tokenContract.balanceOf(account),
-        nftContract.balanceOf(account),
-        nftContract.totalMinted(),
-        tokenContract.allowance(account, currentProject.exchangeAddress),
-        exchangeContract.requiredTokens().catch(() => requiredTokensRaw),
+        tokenContract.balanceOf(account).catch(() => 0n),
+        nftContract.balanceOf(account).catch(() => 0n),
+        nftContract.totalMinted().catch(() => 0n),
+        tokenContract.allowance(account, currentProject.exchangeAddress).catch(() => 0n),
+        exchangeContract.requiredTokens().catch(() => ethers.parseEther('5')),
       ]);
 
       setTokenBalance(ethers.formatUnits(tokenBal, decimals));
@@ -160,16 +195,20 @@ export const useContracts = (signer, provider, account) => {
       setAllowance(allow.toString());
       setRequiredTokensRaw(reqTokens);
 
-      // Fetch user NFTs from backend or synthesize
-      loadUserNFTs(account, Number(nftBal));
-    } catch (err) {
-      console.warn('Refresh data error:', err);
-    } finally {
+      loadUserNFTs(account);
+    } catch {} finally {
       setLoadingData(false);
+      isRefreshingRef.current = false;
     }
-  }, [tokenContract, nftContract, exchangeContract, account, currentProject, requiredTokensRaw]);
+  }, [tokenContract, nftContract, exchangeContract, account, provider, currentProject, checkContractExists]);
 
-  const loadUserNFTs = async (walletAddress, count) => {
+  useEffect(() => {
+    if (account && tokenContract && currentProject) {
+      refreshData();
+    }
+  }, [account, currentProject?.tokenAddress, currentProject?.exchangeAddress, tokenContract]);
+
+  const loadUserNFTs = async (walletAddress) => {
     try {
       const res = await fetch(`${BACKEND_URL}/api/nft/user/${walletAddress}`);
       if (res.ok) {
@@ -179,16 +218,10 @@ export const useContracts = (signer, provider, account) => {
     } catch {}
   };
 
-  useEffect(() => {
-    if (tokenContract && account) {
-      refreshData();
-    }
-  }, [tokenContract, account, refreshData]);
-
   // 5. Create new project via Factory
   const createProject = useCallback(async (params) => {
     if (!factoryContract) {
-      showNotification('error', 'Factory contract not loaded. Please connect MetaMask.');
+      showNotification('error', 'Please connect MetaMask to deploy contracts.');
       return;
     }
 
@@ -219,12 +252,11 @@ export const useContracts = (signer, provider, account) => {
       showNotification('success', '🎉 New Project Deployed Successfully on-chain!');
       await refreshProjects();
     } catch (err) {
-      console.error('Create project failed:', err);
       showNotification('error', `❌ Deployment failed: ${err.reason || err.message}`);
     } finally {
       setIsCreatingProject(false);
     }
-  }, [factoryContract, refreshProjects]);
+  }, [factoryContract, refreshProjects, showNotification]);
 
   // 6. Approve tokens
   const approveTokens = useCallback(async () => {
@@ -243,7 +275,7 @@ export const useContracts = (signer, provider, account) => {
     } finally {
       setIsApproving(false);
     }
-  }, [tokenContract, currentProject, requiredTokensRaw, refreshData]);
+  }, [tokenContract, currentProject, requiredTokensRaw, refreshData, showNotification]);
 
   // 7. Deposit tokens & Mint NFT
   const mintNFT = useCallback(async () => {
@@ -256,7 +288,6 @@ export const useContracts = (signer, provider, account) => {
       showNotification('info', 'Mint transaction submitted! Waiting for confirmation...');
       const receipt = await tx.wait();
 
-      // Extract minted token ID
       let mintedId = totalMinted ? (Number(totalMinted) + 1).toString() : '1';
       for (const log of receipt.logs) {
         try {
@@ -289,9 +320,9 @@ export const useContracts = (signer, provider, account) => {
     } finally {
       setIsMinting(false);
     }
-  }, [exchangeContract, account, currentProject, totalMinted, refreshData]);
+  }, [exchangeContract, account, currentProject, totalMinted, refreshData, showNotification]);
 
-  // 8. Faucet: Mint 100 test tokens to caller (owner only, or for testing)
+  // 8. Faucet: Mint 100 test tokens
   const claimFaucetTokens = useCallback(async () => {
     if (!tokenContract || !account) return;
     setIsClaimingFaucet(true);
@@ -309,7 +340,7 @@ export const useContracts = (signer, provider, account) => {
     } finally {
       setIsClaimingFaucet(false);
     }
-  }, [tokenContract, account, currentProject, refreshData]);
+  }, [tokenContract, account, currentProject, refreshData, showNotification]);
 
   const hasEnoughAllowance = BigInt(allowance || '0') >= requiredTokensRaw;
   const hasEnoughTokens = parseFloat(tokenBalance || '0') >= parseFloat(currentProject?.formattedRate || '5');

@@ -13,20 +13,35 @@ export default {
       },
       colors: {
         dark: {
-          950: '#06070c',
-          900: '#0a0c16',
-          850: '#0e1120',
-          800: '#14182c',
-          700: '#1c213d',
-          600: '#262d53',
+          950: '#040d14',
+          900: '#071520',
+          850: '#0a1d2c',
+          800: '#0e2638',
+          700: '#14364f',
+          600: '#1e4c6d',
+        },
+        aqua: {
+          50: '#f0fafb',
+          100: '#b2e5ed', // Palette Color 4
+          200: '#99dde7', // Palette Color 1
+          300: '#87dfe9', // Palette Color 3
+          400: '#2ec7c0', // Palette Color 2
+          500: '#00abc5', // Palette Color 5
+          600: '#0092a8',
+          700: '#007486',
+          800: '#074e5b',
+          900: '#0a3a44',
+          950: '#041f26',
         },
         brand: {
-          violet: '#8b5cf6',
-          fuchsia: '#d946ef',
-          cyan: '#06b6d4',
-          indigo: '#6366f1',
+          primary: '#00abc5',
+          teal: '#2ec7c0',
+          soft: '#87dfe9',
+          ice: '#99dde7',
+          light: '#b2e5ed',
           emerald: '#10b981',
           rose: '#f43f5e',
+          amber: '#f59e0b',
         }
       },
       animation: {
@@ -34,6 +49,7 @@ export default {
         'float-slow': 'float 5s ease-in-out infinite',
         'spin-slow': 'spin 12s linear infinite',
         'shimmer': 'shimmer 2.5s infinite linear',
+        'pulse-subtle': 'pulseSubtle 3s ease-in-out infinite',
       },
       keyframes: {
         float: {
@@ -47,11 +63,15 @@ export default {
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
+        },
+        pulseSubtle: {
+          '0%, 100%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.04)', opacity: '0.9' },
         }
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'mesh-glow': 'radial-gradient(circle at 50% 0%, rgba(139, 92, 246, 0.25) 0%, transparent 60%)',
+        'mesh-glow': 'radial-gradient(circle at 50% 0%, rgba(46, 199, 192, 0.25) 0%, transparent 60%)',
       }
     },
   },

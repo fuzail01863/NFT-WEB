@@ -26,39 +26,39 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
-      <div className="glass-panel-glow w-full max-w-2xl p-6 sm:p-8 space-y-6 my-8 border-purple-500/40 relative">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#030910]/85 backdrop-blur-md overflow-y-auto">
+      <div className="glass-panel-glow w-full max-w-2xl max-h-[90vh] overflow-y-auto p-5 sm:p-8 space-y-5 sm:space-y-6 my-auto border-aqua-400/40 relative">
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 text-gray-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+          className="absolute top-4 sm:top-5 right-4 sm:right-5 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
         >
           <X className="w-5 h-5" />
         </button>
 
         <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-aqua-400/20 border border-aqua-400/40 flex items-center justify-center text-aqua-300 flex-shrink-0">
               <PlusCircle className="w-4 h-4" />
             </div>
-            <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+            <h2 className="text-lg sm:text-2xl font-black text-white tracking-tight">
               Launch New Token-to-NFT Project
             </h2>
           </div>
-          <p className="text-xs sm:text-sm text-gray-400">
+          <p className="text-xs sm:text-sm text-slate-300">
             Deploy dynamic ERC-20, ERC-721 NFT, and Exchange contracts via the Factory in 1 single transaction.
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
           {/* 1. Token Setup */}
-          <div className="space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 text-sm font-semibold text-purple-300">
+          <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-[#061826]/80 border border-aqua-400/25">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-aqua-300">
               <Coins className="w-4 h-4" />
               <span>1. Custom ERC-20 Token Configuration</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="text-gray-300 block mb-1">Token Name *</label>
+                <label className="text-slate-200 block mb-1 font-semibold">Token Name *</label>
                 <input
                   type="text"
                   required
@@ -69,7 +69,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                 />
               </div>
               <div>
-                <label className="text-gray-300 block mb-1">Token Symbol *</label>
+                <label className="text-slate-200 block mb-1 font-semibold">Token Symbol *</label>
                 <input
                   type="text"
                   required
@@ -80,7 +80,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                 />
               </div>
               <div>
-                <label className="text-gray-300 block mb-1">Decimals</label>
+                <label className="text-slate-200 block mb-1 font-semibold">Decimals</label>
                 <input
                   type="number"
                   min="0"
@@ -91,7 +91,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                 />
               </div>
               <div>
-                <label className="text-gray-300 block mb-1">Initial Supply (Tokens to Creator)</label>
+                <label className="text-slate-200 block mb-1 font-semibold">Initial Supply (Tokens to Creator)</label>
                 <input
                   type="number"
                   min="0"
@@ -104,14 +104,14 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
           </div>
 
           {/* 2. NFT Collection Setup */}
-          <div className="space-y-3 p-4 rounded-xl bg-white/5 border border-white/10">
-            <div className="flex items-center gap-2 text-sm font-semibold text-blue-300">
+          <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-[#061826]/80 border border-aqua-400/25">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-aqua-300">
               <Sparkles className="w-4 h-4" />
               <span>2. Custom ERC-721 NFT Collection Configuration</span>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
               <div>
-                <label className="text-gray-300 block mb-1">NFT Collection Name *</label>
+                <label className="text-slate-200 block mb-1 font-semibold">NFT Collection Name *</label>
                 <input
                   type="text"
                   required
@@ -122,7 +122,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                 />
               </div>
               <div>
-                <label className="text-gray-300 block mb-1">NFT Symbol *</label>
+                <label className="text-slate-200 block mb-1 font-semibold">NFT Symbol *</label>
                 <input
                   type="text"
                   required
@@ -133,7 +133,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                 />
               </div>
               <div>
-                <label className="text-gray-300 block mb-1">Max Supply (0 = Unlimited)</label>
+                <label className="text-slate-200 block mb-1 font-semibold">Max Supply (0 = Unlimited)</label>
                 <input
                   type="number"
                   min="0"
@@ -143,7 +143,7 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                 />
               </div>
               <div>
-                <label className="text-gray-300 block mb-1">Base Metadata URI</label>
+                <label className="text-slate-200 block mb-1 font-semibold">Base Metadata URI</label>
                 <input
                   type="text"
                   value={form.baseMetadataURI}
@@ -155,14 +155,14 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
           </div>
 
           {/* 3. Dynamic Mint Rate */}
-          <div className="space-y-3 p-4 rounded-xl bg-pink-500/5 border border-pink-500/20">
-            <div className="flex items-center gap-2 text-sm font-semibold text-pink-300">
+          <div className="space-y-3 p-3.5 sm:p-4 rounded-2xl bg-aqua-500/[0.1] border border-aqua-400/35">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-aqua-300">
               <Layers className="w-4 h-4" />
               <span>3. Dynamic Exchange Rate (Tokens per NFT)</span>
             </div>
-            <div className="flex items-center gap-4 text-xs">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 text-xs">
               <div className="flex-1">
-                <label className="text-gray-300 block mb-1">
+                <label className="text-slate-200 block mb-1 font-semibold">
                   How many tokens must a user deposit to mint 1 NFT? *
                 </label>
                 <input
@@ -172,11 +172,11 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
                   required
                   value={form.tokensPerNFT}
                   onChange={(e) => setForm({ ...form, tokensPerNFT: e.target.value })}
-                  className="input-field py-2.5 text-sm font-bold text-pink-300"
+                  className="input-field py-2.5 text-sm font-black text-aqua-300"
                 />
               </div>
-              <div className="text-gray-400 font-mono text-xs pt-4">
-                Deposit <span className="text-white font-bold">{form.tokensPerNFT || 0}</span> Tokens = <span className="text-white font-bold">1</span> NFT
+              <div className="text-slate-300 font-mono text-xs sm:pt-4">
+                Deposit <span className="text-aqua-300 font-black">{form.tokensPerNFT || 0}</span> Tokens = <span className="text-white font-black">1</span> NFT
               </div>
             </div>
           </div>
@@ -187,24 +187,24 @@ export const CreateProjectModal = ({ isOpen, onClose, onCreateProject, isCreatin
               type="button"
               onClick={onClose}
               disabled={isCreating}
-              className="btn-glass px-5 py-2.5 rounded-xl text-xs font-semibold"
+              className="btn-cyber-secondary px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold text-slate-200 hover:text-white"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isCreating}
-              className="btn-gradient px-6 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2 shadow-purple-600/30"
+              className="btn-cyber-primary px-5 sm:px-6 py-2.5 rounded-xl text-xs sm:text-sm font-black flex items-center gap-2 shadow-aqua-500/35 text-white"
             >
               {isCreating ? (
                 <>
-                  <RefreshCw className="w-4 h-4 animate-spin" />
-                  <span>Deploying via Factory...</span>
+                  <RefreshCw className="w-4 h-4 animate-spin text-white" />
+                  <span className="text-white">Deploying via Factory...</span>
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Deploy Project on Blockchain</span>
+                  <CheckCircle2 className="w-4 h-4 text-white" />
+                  <span className="text-white">Deploy Project on Blockchain</span>
                 </>
               )}
             </button>

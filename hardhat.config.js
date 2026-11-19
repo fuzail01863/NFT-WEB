@@ -2,8 +2,8 @@ require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-chai-matchers");
 require("dotenv").config();
 
-const PRIVATE_KEY = process.env.PRIVATE_KEY || "0x0000000000000000000000000000000000000000000000000000000000000001";
-const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "";
+const PRIVATE_KEY = process.env.PRIVATE_KEY || "";
+const SEPOLIA_RPC_URL = process.env.SEPOLIA_RPC_URL || "https://ethereum-sepolia-rpc.publicnode.com";
 const ETHERSCAN_API_KEY = process.env.ETHERSCAN_API_KEY || "";
 
 /** @type import('hardhat/config').HardhatUserConfig */
@@ -29,8 +29,8 @@ module.exports = {
     },
     sepolia: {
       url: SEPOLIA_RPC_URL,
-      accounts: PRIVATE_KEY !== "0x0000000000000000000000000000000000000000000000000000000000000001"
-        ? [PRIVATE_KEY]
+      accounts: PRIVATE_KEY && PRIVATE_KEY.trim() !== ""
+        ? [PRIVATE_KEY.trim().startsWith("0x") ? PRIVATE_KEY.trim() : `0x${PRIVATE_KEY.trim()}`]
         : [],
       chainId: 11155111,
     },
